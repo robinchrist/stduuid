@@ -735,6 +735,8 @@ namespace uuids
    };
 #endif
 
+   // basic_uuid_random_generator holds a non-owning pointer to the random generator
+   // make sure that the random generator does not go out of scope!
    template <typename UniformRandomNumberGenerator>
    class basic_uuid_random_generator
    {
@@ -742,9 +744,9 @@ namespace uuids
       using engine_type = UniformRandomNumberGenerator;
 
       explicit basic_uuid_random_generator(engine_type& gen) :
-         generator(&gen, [](auto) {}) {}
+         generator(&gen) {}
       explicit basic_uuid_random_generator(engine_type* gen) :
-         generator(gen, [](auto) {}) {}
+         generator(gen) {}
 
       [[nodiscard]] uuid operator()()
       {
@@ -765,7 +767,7 @@ namespace uuids
 
    private:
       std::uniform_int_distribution<uint32_t>  distribution;
-      std::shared_ptr<UniformRandomNumberGenerator> generator;
+      UniformRandomNumberGenerator* generator;
    };
 
    using uuid_random_generator = basic_uuid_random_generator<std::mt19937>;
